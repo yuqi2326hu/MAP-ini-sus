@@ -1,111 +1,105 @@
+
 # MAP-ini-sus
-############################################################
-# README
-############################################################
 
-# Project overview:
-# This project analyses simulated MAP infection data under
-# different testing frequencies and phenotype definitions.
-# The aim is to compare estimated breeding values and
-# genetic parameter estimates across models.
+## Overview
 
-############################################################
-# Suggested running order
-############################################################
+This repository contains analyses of simulated *Mycobacterium avium* subsp. *paratuberculosis* (MAP) infection data to evaluate how testing frequency, phenotype definition, and age window affect the estimation of genetic parameters and breeding values for host initial susceptibility.
 
-# Run the scripts in the following order:
-# 1. README
-# 2. Load packages
-# 3. Read in data
-# 4. Set parameters
-# 5. Set graph layout
-# 6. Run the analysis scripts for each testing frequency
+The project uses simulated longitudinal infection data to compare alternative data collection strategies and phenotype constructions, and to generate figures used in the report.
 
-############################################################
-# Key setting 1: age window
-############################################################
+## Main components
 
-# In the binary_wk step, the age window is controlled by:
-# time_end = pmin(first(birthweek) + 20, last(test_time), na.rm = TRUE)
+### Testing frequency comparison
+Analyses are available for:
+- weekly
+- monthly
+- seasonal
+- annual testing schemes
 
-# The value "+20" determines the upper limit of the age window.
-# Change this value if you want a different age window.
-# For example:
-# +10  -> age window 1-10
-# +20  -> age window 1-20
-# +30  -> age window 1-30
-# +40  -> age window 1-40
-# +52  -> age window 1-52
+### Phenotype construction
+Supports both:
+- lifetime infection phenotypes
+- calf-life infection phenotypes within a selected age window
 
-############################################################
-# Key setting 2: phenotype definition
-############################################################
+### Age-window settings
+The upper limit of the age window can be modified in the `binary_wk` step.
 
-# Lifetime phenotype:
-# result = as.integer(any(state == 1, na.rm = TRUE))
+### Figure generation
+- **R** is used for the main analyses and figure generation
+- selected figure processing and assembly are done in **Python**
 
-# This means the animal is coded as positive if it was ever
-# infected during the observed period.
+## Key settings
 
-# Calf-life phenotype:
-# result = as.integer(
-#   if (any(age <= 52, na.rm = TRUE)) {
-#     any(state == 1 & age <= 52, na.rm = TRUE)
-#   } else {
-#     any(state == 1, na.rm = TRUE)
-#   }
-# )
+### Age window
+The age window is controlled in the `binary_wk` step:
 
-# This means the animal is coded as positive if it was
-# infected during calf life, within the chosen age window.
+```r
+time_end = pmin(first(birthweek) + 20, last(test_time), na.rm = TRUE)
+```
 
-############################################################
-# Scripts for different testing frequencies
-############################################################
+The value +20 determines the upper limit of the age window.
+Change this value if you want to use a different age window.
 
-# "weekly"
-#   Analysis for weekly testing data
+### Phenotype definition
+#### Lifetime phenotype
 
-# "monthly"
-#   Analysis for monthly testing data
+```r
+result = as.integer(any(state == 1, na.rm = TRUE))
+```
 
-# "seasonal"
-#   Analysis for seasonal testing data
+This definition codes an animal as positive if it was infected at any time during the observed period.
+#### Calf-life phenotype
 
-# "annually_test_model_7&8"
-#   Uses the annual testing dataset for Model 7 and Model 8
-#   Suggested to run earlier
+```r
+result = as.integer(
+  if (any(age <= 52, na.rm = TRUE)) {
+    any(state == 1 & age <= 52, na.rm = TRUE)
+  } else {
+    any(state == 1, na.rm = TRUE)
+  }
+)
+```
 
-############################################################
-# True dynamics
-############################################################
+This definition codes an animal as positive if infection occurred during calf life, within the selected age window.
 
-# "true dynamics" is used to generate the true infection
-# dynamics, which are used as the background in the figures
-# of the report.
+## Scripts
+Main analysis scripts include:
 
-############################################################
-# Notes
-############################################################
+weekly
 
-# To change the age window:
-# modify the value in
-# time_end = pmin(first(birthweek) + XX, last(test_time), na.rm = TRUE)
+monthly
 
-# To switch phenotype definition:
-# replace the "result" line with either the lifetime phenotype
-# version or the calf-life phenotype version
+seasonal
 
-# Make sure the correct dataset is used for each testing
-# frequency script.
+annually_test_model_7&8
 
-############################################################
-# Output
-############################################################
+true dynamics
 
-# The scripts generate:
-# - phenotype datasets under different testing frequencies
-# - model results for cow-level and sire-level comparisons
-# - figures for the report
-# - true dynamics plots for figure backgrounds
-############################################################
+The true dynamics script generates the underlying infection dynamics used as figure backgrounds in the report.
+
+### Python figure scripts
+Additional figure-related scripts are located in code/python.
+
+#### confusion plot
+
+Used to generate Figure 3 in the report.
+The input data are first summarised in R and then plotted in Python.
+
+#### tu and appendix
+
+Used to combine R-generated figures into the final layout used in the thesis/report.
+
+
+## Software
+
+This project uses:
+
+R for data processing, phenotype construction, statistical analyses, and most figures
+
+Python for selected figure preparation and figure assembly
+
+## Contact
+
+Yuqi Hu
+Wageningen University & Research
+yuqi.hu@wur.nl
